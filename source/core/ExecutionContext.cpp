@@ -22,6 +22,12 @@ extern "C" {
 }
 #endif
 
+#if kVireoOS_emscripten
+extern "C" {
+    extern void jsExecutionContextDebugNodeSync(StringRef)
+}
+#endif
+
 //------------------------------------------------------------
 Boolean ExecutionContext::_classInited;
 _PROGMEM InstructionCore ExecutionContext::_culDeSac;
@@ -134,6 +140,17 @@ VIREO_FUNCTION_SIGNATURE1(FPSync, StringRef)
 #endif
     return _NextInstruction();
 }
+
+// generic implementation: debug node
+VIREO_FUNCTION_SIGNATURE1(DEBUGNODE, StringRef)
+{
+#if kVireoOS_emscripten
+    // If on debug node Probe or breakpoint is set we do the call back else next intruction
+    jsExecutionContextDebugNodeSync(_Param(0));
+#endif
+    return _NextInstruction();
+}
+
 //------------------------------------------------------------
 //
 

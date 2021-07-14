@@ -142,7 +142,7 @@ VIREO_FUNCTION_SIGNATURE1(FPSync, StringRef)
 }
 
 // generic implementation: debug node
-VIREO_FUNCTION_SIGNATURE1(DEBUGNODE, StringRef)
+VIREO_FUNCTION_SIGNATURE1(DebugNode, StringRef)
 {
 #if kVireoOS_emscripten
     // If on debug node Probe or breakpoint is set we do the call back else next intruction

@@ -31,10 +31,10 @@ var assignCoreHelpers;
             fpSync(fpString);
         };
 
-        Module.coreHelpers.jsExecutionContextDebugNodeSync = function (debugNodeIdentifierStringPointer) {                                                                                                                                                                                                                                                                                                                                                                                                                         
+        Module.coreHelpers.jsExecutionContextDebugNodeSync = function (debugNodeIdentifierStringPointer) {
             var debugNodeIdentifierString = Module.eggShell.dataReadString(debugNodeIdentifierStringPointer);
             debugNodeSync(debugNodeIdentifierString);
-        }
+        };
 
         Module.coreHelpers.jsSystemLogging_WriteMessageUTF8 = function (
             messageTypeRef, messageDataRef,

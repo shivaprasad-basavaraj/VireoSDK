@@ -679,13 +679,13 @@ var assignEggShell;
         };
 
         Module.eggShell.getDebugPointState = publicAPI.eggShell.getDebugPointState = function (objectID) {
-            var objectIdStackPointer = Module.coreHelpers.writeJSStringToHeap(objectID);
-            return Module._EggShell_GetDebugPointState(Module.eggShell.v_userShell, objectIdStackPointer);
+            var objectIdHeapPointer = Module.coreHelpers.writeJSStringToHeap(objectID);
+            return Module._EggShell_GetDebugPointState(Module.eggShell.v_userShell, objectIdHeapPointer);
         };
 
         Module.eggShell.setDebugPointState = publicAPI.eggShell.setDebugPointState = function (objectID, state) {
-            var objectIdStackPointer = Module.coreHelpers.writeJSStringToHeap(objectID);
-            Module._EggShell_SetDebugPointState(Module.eggShell.v_userShell, objectIdStackPointer, state);
+            var objectIdHeapPointer = Module.coreHelpers.writeJSStringToHeap(objectID);
+            Module._EggShell_SetDebugPointState(Module.eggShell.v_userShell, objectIdHeapPointer, state);
         };
 
         Module.eggShell.loadVia = publicAPI.eggShell.loadVia = function (viaText, isDebuggingEnabled = false) {

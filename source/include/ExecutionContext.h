@@ -51,7 +51,7 @@ class VIClumpQueue
     Boolean IsEmpty() const { return (this->_head == nullptr); }
     VIClump* Dequeue();
     void Enqueue(VIClump* elt);
-	int size();
+    int size();
 };
 
 enum ExecSlicesResult {

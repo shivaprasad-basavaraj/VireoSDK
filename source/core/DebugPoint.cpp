@@ -6,7 +6,6 @@
 
 #if kVireoOS_emscripten
 #include <emscripten.h>
-#include "ExecutionContext.cpp"
 #endif
 
 namespace Vireo {
@@ -16,15 +15,15 @@ namespace Vireo {
     {
         if (THREAD_EXEC()->debuggingContext->GetDebugPointState(_Param(0)->MakeSubStringAlias())) {
 #if kVireoOS_emscripten
-			THREAD_EXEC()->_viPaused = true;
-			THREAD_EXEC()->ExecuteTillNextStopPoint();
+            THREAD_EXEC()->_viPaused = true;
+            THREAD_EXEC()->ExecuteTillNextStopPoint();
             jsDebuggingContextDebugPointInterrupt(_Param(0));
 #endif
         }
-		if (THREAD_EXEC()->_viPaused) {
-			return _this;
-		}
-		return _NextInstruction();
+        if (THREAD_EXEC()->_viPaused) {
+            return _this;
+        }
+        return _NextInstruction();
     }
 
     DEFINE_VIREO_BEGIN(Execution)

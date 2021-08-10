@@ -450,7 +450,7 @@ Int32 /*ExecSlicesResult*/ ExecutionContext::ExecuteSlices(Int32 numSlices, Int3
     return reply;
 }
 //------------------------------------------------------------
-void ExecutionContext::ExecuteTillNextStopPoint()
+void ExecutionContext::ExecuteAllClumpsTillNextDebugPoint()
 {
     int sizeOfQueue = _runQueue.size();
     while (sizeOfQueue > 0)

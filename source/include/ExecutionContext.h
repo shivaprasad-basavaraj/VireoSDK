@@ -91,11 +91,10 @@ class ExecutionContext
  private:
     ECONTEXT    VIClumpQueue    _runQueue;         // Clumps ready to run
     ECONTEXT    Int32           _breakoutCount;   // Inner execution loop "breaks out" when this gets to 0
-
+    ECONTEXT    Boolean          _viPaused = false;
  public:
     ECONTEXT    Timer           _timer;           // TODO(PaulAustin): can be moved out of the execcontext once
                                                  // instruction can take injected parameters.
-    ECONTEXT    Boolean          _viPaused = false;
 #ifdef VIREO_SUPPORTS_ISR
     ECONTEXT    VIClump*        _triggeredIsrList;  // Elts waiting for something external to wake them up
     ECONTEXT    void            IsrEnqueue(QueueElt* elt);
@@ -112,14 +111,15 @@ class ExecutionContext
     ECONTEXT    InstructionCore* SuspendRunningQueueElt(InstructionCore* nextInClump);
     ECONTEXT    InstructionCore* Stop();
     ECONTEXT    void            ClearBreakout() { _breakoutCount = 0; }
-    ECONTEXT    void            ExecuteTillNextStopPoint();
+    ECONTEXT    void            ExecuteAllClumpsTillNextDebugPoint();
     ECONTEXT    void            EnqueueRunQueue(VIClump* elt);
     ECONTEXT    VIClump*        _runningQueueElt;    // Element actually running
     ECONTEXT DebuggingContext* debuggingContext;
  public:
     // Method for runtime errors to be routed through.
     ECONTEXT    void            LogEvent(EventLog::EventSeverity severity, ConstCStr message, ...) const;
-
+    ECONTEXT Boolean getVIPauseState();
+    ECONTEXT void setVIPauseState(Boolean pauseState);
  private:
     static Boolean _classInited;
     static InstructionCore _culDeSac;

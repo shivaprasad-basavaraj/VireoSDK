@@ -61,9 +61,9 @@ VIClump* VIClumpQueue::Dequeue()
 int VIClumpQueue::size()
 {
     int numberOfElements = 0;
-    VIClumpQueue* temp = this;
-    while (temp->_head != nullptr) {
-        temp->_head = temp->_head->_next;
+    VIClumpQueue temp = *this;
+    while (temp._head != nullptr) {
+        temp._head = temp._head->_next;
         numberOfElements++;
     }
     return numberOfElements;

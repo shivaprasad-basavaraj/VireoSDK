@@ -15,13 +15,13 @@ namespace Vireo {
     {
         if (THREAD_EXEC()->debuggingContext->GetDebugPointState(_Param(0)->MakeSubStringAlias())) {
 #if kVireoOS_emscripten
-            THREAD_EXEC()->_viPaused = true;
-            THREAD_EXEC()->ExecuteTillNextStopPoint();
+            THREAD_EXEC()->setVIPauseState(false);
+            THREAD_EXEC()->ExecuteAllClumpsTillNextDebugPoint();
             jsDebuggingContextDebugPointInterrupt(_Param(0));
 #endif
         }
-        if (THREAD_EXEC()->_viPaused) {
-            return _this;
+        if (THREAD_EXEC()->getVIPauseState()) {
+           return _this;
         }
         return _NextInstruction();
     }

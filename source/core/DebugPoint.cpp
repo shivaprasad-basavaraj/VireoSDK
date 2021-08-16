@@ -13,7 +13,7 @@ namespace Vireo {
     // Debug node which will check if breakpoint is set or not
     VIREO_FUNCTION_SIGNATURE1(DebugPoint, StringRef)
     {
-        if (THREAD_EXEC()->debuggingContext->GetDebugPointState(_Param(0)->MakeSubStringAlias())) {
+        if (THREAD_EXEC()->debuggingContext->GetDebugPointState((const char*)_Param(0)->Begin())) {
 #if kVireoOS_emscripten
             jsDebuggingContextDebugPointInterrupt(_Param(0));
 #endif

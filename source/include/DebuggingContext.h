@@ -24,20 +24,20 @@ namespace Vireo
 class DebuggingContext
 {
  private:
-    std::map<SubString, bool, CompareSubString> _debugPointState;
+    std::map<const char*, bool> _debugPointState;
  public:
-    bool GetDebugPointState(SubString objectID)
+    bool GetDebugPointState(const char* objectID)
     {
-         typedef std::map<SubString, bool>::iterator iterator;
-         iterator it = _debugPointState.find(objectID);
-
-         if (it == _debugPointState.end()) {
-         // error out:  std::cout << "Key-value pair not present in map";
-              return false;
-         }
-        return it->second;
+        for (auto itr : _debugPointState)
+        {
+            if (strcmp(itr.first, objectID) == 0)
+            {
+                return itr.second;
+            }
+        }
+        return false;
     }
-    void SetDebugPointState(SubString objectID, bool state)
+    void SetDebugPointState(const char* objectID, bool state)
     {
          _debugPointState[objectID] = state;
     }

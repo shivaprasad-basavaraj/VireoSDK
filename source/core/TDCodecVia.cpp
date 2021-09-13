@@ -1723,6 +1723,7 @@ void TDViaParser::ParseClump(VIClump* viClump, InstructionAllocator* cia, Boolea
 
     while (!instructionNameToken.CompareCStr(")")) {
         RepinLineNumberBase();
+        bool isDebuggingInstruction = instructionNameToken.CompareCStr("DebugPoint");
 
         if (instructionNameToken.CompareCStr(tsPerchOpToken)) {
             // Perch instructions are only anchor points
@@ -1736,7 +1737,7 @@ void TDViaParser::ParseClump(VIClump* viClump, InstructionAllocator* cia, Boolea
             if (!_string.EatChar(')'))
                 return LOG_EVENT(kHardDataError, "')' missing");
             state.MarkPerch(&perchName);
-        } else if (instructionNameToken.CompareCStr("DebugPoint") && !isDebuggingEnabled) {
+        } else if (isDebuggingInstruction && !isDebuggingEnabled) {
             // No -Op
             if (!_string.EatChar('('))
                 return LOG_EVENT(kHardDataError, "'(' missing");
@@ -1836,7 +1837,7 @@ void TDViaParser::ParseClump(VIClump* viClump, InstructionAllocator* cia, Boolea
                     keepTrying = state.StartNextOverload() != nullptr;
                 }
             }
-            InstructionCore* instruction = state.EmitInstruction();
+            InstructionCore* instruction = state.EmitInstruction(isDebuggingInstruction);
 #if VIREO_DEBUG_PARSING_PRINT_OVERLOADS
             if (cia->IsCalculatePass()) {
                 if (instruction) {

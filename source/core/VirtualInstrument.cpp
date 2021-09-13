@@ -1148,7 +1148,7 @@ InstructionCore* ClumpParseState::EmitInstruction(SubString* opName, Int32 argCo
 }
 //------------------------------------------------------------
 //! Emit the instruction resolved to by general clump parser.
-InstructionCore* ClumpParseState::EmitInstruction()
+InstructionCore* ClumpParseState::EmitInstruction(bool isDebuggingInstruction)
 {
     if (!_instructionType) {
         _varArgCount = -1;
@@ -1193,6 +1193,16 @@ InstructionCore* ClumpParseState::EmitInstruction()
 #endif
     }
 
+    if (isDebuggingInstruction) {
+        TypeRef debugPointStateType = _clump->TheTypeManager()->FindType(&TypeCommon::TypeUInt8);
+        DefaultValueType *debugPointState = DefaultValueType::New(_clump->TheTypeManager(), debugPointStateType, true);
+        void* data = THREAD_TADM()->Malloc(debugPointStateType->TopAQSize());
+        debugPointState->InitData(data);
+        debugPointState->FinalizeDVT();
+        void* pData = static_cast<AQBlock1*>(debugPointState->Begin(kPAReadWrite));  // * passed as a param means nullptr
+        InternalAddArgBack(debugPointStateType, pData);
+    }
+
     _varArgCount = -1;
     _varArgRepeatStart = 0;
     _totalInstructionCount++;
@@ -1227,6 +1237,10 @@ InstructionCore* ClumpParseState::EmitInstruction()
         }
     }
     _argPatchCount = 0;
+    if (isDebuggingInstruction) {
+        StringRef* debugPointId = (StringRef*)(_argPointers[0]);
+        THREAD_EXEC()->debuggingContext->SetDebugPointInstruction(*debugPointId, (DebugPointInstruction*)instruction);
+    }
     return instruction;
 }
 //------------------------------------------------------------

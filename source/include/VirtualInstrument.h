@@ -386,7 +386,7 @@ class ClumpParseState
     void            LogArgumentProcessing(Int32 lineNumber);
 
     InstructionCore*    EmitCallVIInstruction();
-    InstructionCore*    EmitInstruction();
+    InstructionCore*    EmitInstruction(bool isDebuggingInstruction = false);
     InstructionCore*    EmitInstruction(SubString* opName, Int32 argCount, ...);
 
     void            EmitSimpleInstruction(ConstCStr opName);

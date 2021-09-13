@@ -29,6 +29,7 @@ _PROGMEM InstructionCore ExecutionContext::_culDeSac;
 #ifdef VIREO_SINGLE_GLOBAL_CONTEXT
 TypeManagerRef  ExecutionContext::_theTypeManager;
 VIClumpQueue    ExecutionContext::_runQueue;            // Elts ready To run
+VIClumpQueue    ExecutionContext::_waitQueue
 VIClump*        ExecutionContext::_sleepingList;        // Elts waiting for something external to wake them up
 VIClump*        ExecutionContext::_runningQueueElt;     // Elt actually running
 Int32           ExecutionContext::_breakoutCount;
@@ -329,6 +330,32 @@ InstructionCore* ExecutionContext::SuspendRunningQueueElt(InstructionCore* nextI
     }
 }
 
+void ExecutionContext::CopyAndEmptyRunningQueue(InstructionCore* nextInClump)
+{
+    VIREO_ASSERT(nullptr != _runningQueueElt)
+
+    _runningQueueElt->_savePc = nextInClump;
+    _waitQueue.Enqueue(_runningQueueElt);
+    while ((_runningQueueElt != nullptr)){
+        _runningQueueElt = _runQueue.Dequeue();
+        _waitQueue.Enqueue(_runningQueueElt);
+    }
+}
+
+void ExecutionContext::PauseExecutionContext(){
+    setVIState(2);
+}
+
+void ExecutionContext::FillRunningQueue()
+{
+    VIClump*  clump;
+    clump = (_waitQueue).Dequeue();
+    while (clump != nullptr){
+        _runQueue.Enqueue(clump);
+        clump = (_waitQueue).Dequeue();
+    }
+    setVIState(1);
+}
 
 //------------------------------------------------------------
 // ExecuteSlices - execute instructions in run queue repeatedly (numSlices at a time before breaking out and checking
@@ -446,8 +473,29 @@ Int32 /*ExecSlicesResult*/ ExecutionContext::ExecuteSlices(Int32 numSlices, Int3
     if (reply == kExecSlices_ClumpsFinished) {
         RunCleanupProcs(nullptr);  // Cleans up all control refs when top VI finishes (refs not associated with the completion of the VI they are linked to).
     }
+    if (reply == kExecSlices_ClumpsFinished && getVIPauseState() != 2){
+        setVIState(0);
+    }
 
     return reply;
+}
+//------------------------------------------------------------
+void ExecutionContext::ExecuteAllClumpsTillNextDebugPoint()
+{
+    int sizeOfQueue = _runQueue.size();
+    while (sizeOfQueue > 0)
+    {
+        VIClump*  clump = _runQueue.Dequeue();
+        InstructionCore* currentInstruction = _runningQueueElt ? _runningQueueElt->_savePc : nullptr;
+        InstructionCore* nextInstruction = nullptr;
+        while (nextInstruction != &_culDeSac) {
+            currentInstruction = nextInstruction ? nextInstruction : currentInstruction;
+            nextInstruction = _PROGMEM_PTR(currentInstruction, _function)(currentInstruction);
+        }
+        clump->_savePc = currentInstruction;
+        _runQueue.Enqueue(clump);
+        sizeOfQueue--;
+    }
 }
 //------------------------------------------------------------
 void ExecutionContext::EnqueueRunQueue(VIClump* elt)
@@ -464,6 +512,16 @@ void ExecutionContext::LogEvent(EventLog::EventSeverity severity, ConstCStr mess
     va_start(args, message);
     tempLog.LogEventV(severity, -1, message, args);
     va_end(args);
+}
+//------------------------------------------------------------
+Int32 ExecutionContext::getVIPauseState()
+{
+    return _viPaused;
+}
+//-----------------------------------------------------------
+void ExecutionContext::setVIState(Int32 viState)
+{
+    _viPaused = viState;
 }
 //------------------------------------------------------------
 #ifdef VIVM_SUPPORTS_ISR

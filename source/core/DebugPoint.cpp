@@ -10,19 +10,21 @@
 
 namespace Vireo {
     //------------------------------------------------------------
-    // Debug node which will check if breakpoint is set or not and do return cildsac for VI pause state
+    // Debug node which will check if breakpoint is set or not and do return culdsac for VI pause state
     VIREO_FUNCTION_SIGNATURE1(DebugPoint, StringRef)
     {
-        if (THREAD_EXEC()->debuggingContext->GetDebugPointState(_Param(0)->MakeSubStringAlias())) {
 #if kVireoOS_emscripten
-            THREAD_EXEC()->setVIPauseState(false);
-            THREAD_EXEC()->ExecuteAllClumpsTillNextDebugPoint();
-            jsDebuggingContextDebugPointInterrupt(_Param(0));
+      if (THREAD_EXEC()->debuggingContext->GetBreakPointState((const char*)_Param(0)->Begin())) {
+            THREAD_EXEC()->setVIState(2);
+            jsDebuggingContextBreakPointInterrupt(_Param(0));
+            THREAD_EXEC()->CopyAndEmptyRunningQueue(_NextInstruction());
+            return THREAD_EXEC()->Stop();
+        }
+      if (THREAD_EXEC()->getVIPauseState() == 2){
+          THREAD_EXEC()->CopyAndEmptyRunningQueue(_NextInstruction());
+          return THREAD_EXEC()->Stop();
+      }
 #endif
-        }
-        if (THREAD_EXEC()->getVIPauseState()) {
-           return _this;
-        }
         return _NextInstruction();
     }
 

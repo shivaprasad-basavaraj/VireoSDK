@@ -90,8 +90,9 @@ class ExecutionContext
     ~ExecutionContext();
  private:
     ECONTEXT    VIClumpQueue    _runQueue;         // Clumps ready to run
+    ECONTEXT    VIClumpQueue    _waitQueue;
     ECONTEXT    Int32           _breakoutCount;   // Inner execution loop "breaks out" when this gets to 0
-    ECONTEXT    Boolean          _viPaused = false;
+    ECONTEXT    Int32          _viPaused = 1;
  public:
     ECONTEXT    Timer           _timer;           // TODO(PaulAustin): can be moved out of the execcontext once
                                                  // instruction can take injected parameters.
@@ -109,17 +110,20 @@ class ExecutionContext
     // Run the concurrent execution system for a short period of time
     ECONTEXT    Int32 /*ExecSlicesResult*/ ExecuteSlices(Int32 numSlices, Int32 millisecondsToRun);
     ECONTEXT    InstructionCore* SuspendRunningQueueElt(InstructionCore* nextInClump);
+    ECONTEXT    void             PauseExecutionContext();
     ECONTEXT    InstructionCore* Stop();
     ECONTEXT    void            ClearBreakout() { _breakoutCount = 0; }
     ECONTEXT    void            ExecuteAllClumpsTillNextDebugPoint();
     ECONTEXT    void            EnqueueRunQueue(VIClump* elt);
+    ECONTEXT    void            CopyAndEmptyRunningQueue(InstructionCore* nextInClump);
+    ECONTEXT    void            FillRunningQueue();
     ECONTEXT    VIClump*        _runningQueueElt;    // Element actually running
     ECONTEXT DebuggingContext* debuggingContext;
  public:
     // Method for runtime errors to be routed through.
     ECONTEXT    void            LogEvent(EventLog::EventSeverity severity, ConstCStr message, ...) const;
-    ECONTEXT Boolean getVIPauseState();
-    ECONTEXT void setVIPauseState(Boolean pauseState);
+    ECONTEXT Int32              getVIPauseState();
+    ECONTEXT void               setVIState(Int32 pauseState);
  private:
     static Boolean _classInited;
     static InstructionCore _culDeSac;

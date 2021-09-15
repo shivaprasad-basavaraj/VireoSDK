@@ -15,14 +15,11 @@ namespace Vireo {
     {
 #if kVireoOS_emscripten
       if (THREAD_EXEC()->debuggingContext->GetBreakPointState((const char*)_Param(0)->Begin())) {
-            THREAD_EXEC()->setVIState(2);
             jsDebuggingContextBreakPointInterrupt(_Param(0));
-            THREAD_EXEC()->CopyAndEmptyRunningQueue(_NextInstruction());
-            return THREAD_EXEC()->Stop();
+            return THREAD_EXEC()->Pause(_NextInstruction());
         }
       if (THREAD_EXEC()->getVIPauseState() == 2){
-          THREAD_EXEC()->CopyAndEmptyRunningQueue(_NextInstruction());
-          return THREAD_EXEC()->Stop();
+          return THREAD_EXEC()->Pause(_NextInstruction());
       }
 #endif
         return _NextInstruction();

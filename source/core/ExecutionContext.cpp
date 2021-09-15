@@ -29,7 +29,6 @@ _PROGMEM InstructionCore ExecutionContext::_culDeSac;
 #ifdef VIREO_SINGLE_GLOBAL_CONTEXT
 TypeManagerRef  ExecutionContext::_theTypeManager;
 VIClumpQueue    ExecutionContext::_runQueue;            // Elts ready To run
-VIClumpQueue    ExecutionContext::_waitQueue
 VIClump*        ExecutionContext::_sleepingList;        // Elts waiting for something external to wake them up
 VIClump*        ExecutionContext::_runningQueueElt;     // Elt actually running
 Int32           ExecutionContext::_breakoutCount;
@@ -109,6 +108,19 @@ VIREO_FUNCTION_SIGNATURE1(Stop, Boolean)
     else
         return THREAD_EXEC()->Stop();
 }
+
+InstructionCore* ExecutionContext::Pause(InstructionCore* nextInstruction)
+{
+    _viPaused = 2;
+    _runningQueueElt->_savePc = nextInstruction;
+    _runQueue.Enqueue(_runningQueueElt);
+
+    _runningQueueElt = nullptr;
+    _breakoutCount = 0;
+
+    return &_culDeSac;
+}
+
 //------------------------------------------------------------
 InstructionCore* ExecutionContext::Stop()
 {
@@ -330,31 +342,8 @@ InstructionCore* ExecutionContext::SuspendRunningQueueElt(InstructionCore* nextI
     }
 }
 
-void ExecutionContext::CopyAndEmptyRunningQueue(InstructionCore* nextInClump)
-{
-    VIREO_ASSERT(nullptr != _runningQueueElt)
-
-    _runningQueueElt->_savePc = nextInClump;
-    _waitQueue.Enqueue(_runningQueueElt);
-    while ((_runningQueueElt != nullptr)){
-        _runningQueueElt = _runQueue.Dequeue();
-        _waitQueue.Enqueue(_runningQueueElt);
-    }
-}
-
 void ExecutionContext::PauseExecutionContext(){
     setVIState(2);
-}
-
-void ExecutionContext::FillRunningQueue()
-{
-    VIClump*  clump;
-    clump = (_waitQueue).Dequeue();
-    while (clump != nullptr){
-        _runQueue.Enqueue(clump);
-        clump = (_waitQueue).Dequeue();
-    }
-    setVIState(1);
 }
 
 //------------------------------------------------------------
@@ -363,6 +352,10 @@ void ExecutionContext::FillRunningQueue()
 // See enum ExecSlicesResult for explanation of return values, or comments below where result is set.
 Int32 /*ExecSlicesResult*/ ExecutionContext::ExecuteSlices(Int32 numSlices, Int32 millisecondsToRun)
 {
+    if (_viPaused == 2) {
+        return kExecSlices_ExecutionPaused;
+    }
+
     VIREO_ASSERT((_runningQueueElt == nullptr))
     PlatformTickType currentTime = gPlatform.Timer.TickCount();
     PlatformTickType breakOutTime = currentTime + gPlatform.Timer.MicrosecondsToTickCount(millisecondsToRun * 1000);
@@ -402,6 +395,10 @@ Int32 /*ExecSlicesResult*/ ExecutionContext::ExecuteSlices(Int32 numSlices, Int3
 
         currentTime = gPlatform.Timer.TickCount();
         _timer.QuickCheckTimers(currentTime);
+
+        if (_viPaused == 2) {
+            return kExecSlices_ExecutionPaused;
+        }
 
         if (currentTime < breakOutTime) {
             if (_runningQueueElt) {

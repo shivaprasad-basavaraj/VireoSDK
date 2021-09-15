@@ -72,7 +72,7 @@ VIREO_EXPORT Int32 EggShell_GetVIState(TypeManagerRef tm)
 
 VIREO_EXPORT void EggShell_ResumeVIPreWork(TypeManagerRef tm)
 {
-    return tm->TheExecutionContext()->FillRunningQueue();
+    return tm->TheExecutionContext()->setVIState(1);
 }
 
 VIREO_EXPORT void EggShell_PauseExecutionContext(TypeManagerRef tm)

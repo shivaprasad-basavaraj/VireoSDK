@@ -55,6 +55,7 @@ class VIClumpQueue
 };
 
 enum ExecSlicesResult {
+    kExecSlices_ExecutionPaused = -3,
     kExecSlices_ClumpsWaiting = -2,     // Clumps waiting, but for less than 1 ms; call executeSlices again ASAP
     kExecSlices_ClumpsInRunQueue = -1,  // Clumps ready to run in run queue; call executeSlices again ASAP
     kExecSlices_ClumpsFinished = 0,     // All clumps done executing, nothing waiting on timers.  VI done.
@@ -90,7 +91,6 @@ class ExecutionContext
     ~ExecutionContext();
  private:
     ECONTEXT    VIClumpQueue    _runQueue;         // Clumps ready to run
-    ECONTEXT    VIClumpQueue    _waitQueue;
     ECONTEXT    Int32           _breakoutCount;   // Inner execution loop "breaks out" when this gets to 0
     ECONTEXT    Int32          _viPaused = 1;
  public:
@@ -112,11 +112,10 @@ class ExecutionContext
     ECONTEXT    InstructionCore* SuspendRunningQueueElt(InstructionCore* nextInClump);
     ECONTEXT    void             PauseExecutionContext();
     ECONTEXT    InstructionCore* Stop();
+    ECONTEXT    InstructionCore* Pause(InstructionCore* nextInstruction);
     ECONTEXT    void            ClearBreakout() { _breakoutCount = 0; }
     ECONTEXT    void            ExecuteAllClumpsTillNextDebugPoint();
     ECONTEXT    void            EnqueueRunQueue(VIClump* elt);
-    ECONTEXT    void            CopyAndEmptyRunningQueue(InstructionCore* nextInClump);
-    ECONTEXT    void            FillRunningQueue();
     ECONTEXT    VIClump*        _runningQueueElt;    // Element actually running
     ECONTEXT DebuggingContext* debuggingContext;
  public:

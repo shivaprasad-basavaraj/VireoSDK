@@ -108,6 +108,19 @@ VIREO_FUNCTION_SIGNATURE1(Stop, Boolean)
     else
         return THREAD_EXEC()->Stop();
 }
+
+InstructionCore* ExecutionContext::Pause(InstructionCore* nextInstruction)
+{
+    _viPaused = 2;
+    _runningQueueElt->_savePc = nextInstruction;
+    _runQueue.Enqueue(_runningQueueElt);
+
+    _runningQueueElt = nullptr;
+    _breakoutCount = 0;
+
+    return &_culDeSac;
+}
+
 //------------------------------------------------------------
 InstructionCore* ExecutionContext::Stop()
 {
@@ -329,6 +342,9 @@ InstructionCore* ExecutionContext::SuspendRunningQueueElt(InstructionCore* nextI
     }
 }
 
+void ExecutionContext::PauseExecutionContext(){
+    setVIState(2);
+}
 
 //------------------------------------------------------------
 // ExecuteSlices - execute instructions in run queue repeatedly (numSlices at a time before breaking out and checking
@@ -336,6 +352,10 @@ InstructionCore* ExecutionContext::SuspendRunningQueueElt(InstructionCore* nextI
 // See enum ExecSlicesResult for explanation of return values, or comments below where result is set.
 Int32 /*ExecSlicesResult*/ ExecutionContext::ExecuteSlices(Int32 numSlices, Int32 millisecondsToRun)
 {
+    if (_viPaused == 2) {
+        return kExecSlices_ExecutionPaused;
+    }
+
     VIREO_ASSERT((_runningQueueElt == nullptr))
     PlatformTickType currentTime = gPlatform.Timer.TickCount();
     PlatformTickType breakOutTime = currentTime + gPlatform.Timer.MicrosecondsToTickCount(millisecondsToRun * 1000);
@@ -375,6 +395,10 @@ Int32 /*ExecSlicesResult*/ ExecutionContext::ExecuteSlices(Int32 numSlices, Int3
 
         currentTime = gPlatform.Timer.TickCount();
         _timer.QuickCheckTimers(currentTime);
+
+        if (_viPaused == 2) {
+            return kExecSlices_ExecutionPaused;
+        }
 
         if (currentTime < breakOutTime) {
             if (_runningQueueElt) {
@@ -446,8 +470,29 @@ Int32 /*ExecSlicesResult*/ ExecutionContext::ExecuteSlices(Int32 numSlices, Int3
     if (reply == kExecSlices_ClumpsFinished) {
         RunCleanupProcs(nullptr);  // Cleans up all control refs when top VI finishes (refs not associated with the completion of the VI they are linked to).
     }
+    if (reply == kExecSlices_ClumpsFinished && getVIPauseState() != 2){
+        setVIState(0);
+    }
 
     return reply;
+}
+//------------------------------------------------------------
+void ExecutionContext::ExecuteAllClumpsTillNextDebugPoint()
+{
+    int sizeOfQueue = _runQueue.size();
+    while (sizeOfQueue > 0)
+    {
+        VIClump*  clump = _runQueue.Dequeue();
+        InstructionCore* currentInstruction = _runningQueueElt ? _runningQueueElt->_savePc : nullptr;
+        InstructionCore* nextInstruction = nullptr;
+        while (nextInstruction != &_culDeSac) {
+            currentInstruction = nextInstruction ? nextInstruction : currentInstruction;
+            nextInstruction = _PROGMEM_PTR(currentInstruction, _function)(currentInstruction);
+        }
+        clump->_savePc = currentInstruction;
+        _runQueue.Enqueue(clump);
+        sizeOfQueue--;
+    }
 }
 //------------------------------------------------------------
 void ExecutionContext::EnqueueRunQueue(VIClump* elt)
@@ -464,6 +509,16 @@ void ExecutionContext::LogEvent(EventLog::EventSeverity severity, ConstCStr mess
     va_start(args, message);
     tempLog.LogEventV(severity, -1, message, args);
     va_end(args);
+}
+//------------------------------------------------------------
+Int32 ExecutionContext::getVIPauseState()
+{
+    return _viPaused;
+}
+//-----------------------------------------------------------
+void ExecutionContext::setVIState(Int32 viState)
+{
+    _viPaused = viState;
 }
 //------------------------------------------------------------
 #ifdef VIVM_SUPPORTS_ISR

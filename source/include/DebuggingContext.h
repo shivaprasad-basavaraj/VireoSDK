@@ -19,12 +19,17 @@ namespace Vireo
     extern "C" {
         extern void jsDebuggingContextDebugPointInterrupt(StringRef);
     }
+    extern "C" {
+        extern void jsDebuggingContextBreakPointInterrupt(StringRef);
+    }
 #endif
 
 class DebuggingContext
 {
  private:
     std::map<const char*, bool> _debugPointState;
+    std::map<const char*, bool> _breakPointState;
+
  public:
     bool GetDebugPointState(const char* objectID)
     {
@@ -41,7 +46,22 @@ class DebuggingContext
     {
          _debugPointState[objectID] = state;
     }
+    bool GetBreakPointState(const char* objectID)
+    {
+        for (auto itr : _breakPointState)
+        {
+            if (strcmp(itr.first, objectID) == 0)
+            {
+                return itr.second;
+            }
+        }
+        return false;
+    }
+    void SetBreakPointState(const char* objectID, bool state)
+    {
+         _breakPointState[objectID] = state;
+    }
 };
 }  // namespace Vireo
 
-#endif // ! _DEBUGGINGCONTEXT_H
+#endif  // ! _DEBUGGINGCONTEXT_H

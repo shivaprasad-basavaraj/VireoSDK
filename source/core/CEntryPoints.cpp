@@ -55,6 +55,31 @@ VIREO_EXPORT void EggShell_SetDebugPointState(TypeManagerRef tm, const char* obj
     tm->TheExecutionContext()->debuggingContext->SetDebugPointState(objectID, state);
 }
 
+VIREO_EXPORT Boolean EggShell_GetBreakPointState(TypeManagerRef tm, const char* objectID)
+{
+    return tm->TheExecutionContext()->debuggingContext->GetBreakPointState(objectID);
+}
+
+VIREO_EXPORT void EggShell_SetBreakPointState(TypeManagerRef tm, const char* objectID, Boolean state)
+{
+      tm->TheExecutionContext()->debuggingContext->SetBreakPointState(objectID, state);
+}
+
+VIREO_EXPORT Int32 EggShell_GetVIState(TypeManagerRef tm)
+{
+    return tm->TheExecutionContext()->getVIPauseState();
+}
+
+VIREO_EXPORT void EggShell_ResumeVIPreWork(TypeManagerRef tm)
+{
+    return tm->TheExecutionContext()->setVIState(1);
+}
+
+VIREO_EXPORT void EggShell_PauseExecutionContext(TypeManagerRef tm)
+{
+    return tm->TheExecutionContext()->PauseExecutionContext();
+}
+
 //------------------------------------------------------------
 VIREO_EXPORT TypeRef EggShell_GetTypeList(TypeManagerRef tm)
 {

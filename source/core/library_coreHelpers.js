@@ -12,6 +12,9 @@
         },
         jsDebuggingContextDebugPointInterrupt: function () {
             Module.coreHelpers.jsDebuggingContextDebugPointInterrupt.apply(undefined, arguments);
+        },
+        jsDebuggingContextBreakPointInterrupt: function () {
+            Module.coreHelpers.jsDebuggingContextBreakPointInterrupt.apply(undefined, arguments);
         }
     };
 

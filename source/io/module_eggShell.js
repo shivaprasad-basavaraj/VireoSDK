@@ -688,6 +688,28 @@ var assignEggShell;
             Module._EggShell_SetDebugPointState(Module.eggShell.v_userShell, objectIdHeapPointer, state);
         };
 
+        Module.eggShell.resumeVIPreWork = publicAPI.eggShell.resumeVIPreWork = function () {
+            Module._EggShell_ResumeVIPreWork(Module.eggShell.v_userShell);
+        };
+
+        Module.eggShell.pauseExecutionContext = publicAPI.eggShell.pauseExecutionContext = function () {
+            Module._EggShell_PauseExecutionContext(Module.eggShell.v_userShell);
+        };
+
+        Module.eggShell.getBreakPointState = publicAPI.eggShell.getBreakPointState = function (objectID) {
+            var objectIdHeapPointer = Module.coreHelpers.writeJSStringToHeap(objectID);
+            return Module._EggShell_GetBreakPointState(Module.eggShell.v_userShell, objectIdHeapPointer);
+        };
+
+        Module.eggShell.setBreakPointState = publicAPI.eggShell.setBreakPointState = function (objectID, state) {
+            var objectIdHeapPointer = Module.coreHelpers.writeJSStringToHeap(objectID);
+            Module._EggShell_SetBreakPointState(Module.eggShell.v_userShell, objectIdHeapPointer, state);
+        };
+
+        Module.eggShell.getVIState = publicAPI.eggShell.getVIState = function () {
+            return Module._EggShell_GetVIState(Module.eggShell.v_userShell);
+        };
+
         Module.eggShell.loadVia = publicAPI.eggShell.loadVia = function (viaText, isDebuggingEnabled = false) {
             if (typeof viaText !== 'string') {
                 throw new Error('Expected viaText to be a string');

@@ -144,6 +144,7 @@ class ExecutionContext
 
 void AppendCallChainString(StringRef stringRef);
 Boolean TestNeedsUpdate(TypeRef typeRef, Boolean reset);
+Boolean TestHasUpdate(TypeRef typeRef, Boolean reset);
 
 }  // namespace Vireo
 

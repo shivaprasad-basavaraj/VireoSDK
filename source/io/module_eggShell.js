@@ -276,6 +276,14 @@ var assignEggShell;
             return Module.typeHelpers.testNeedsUpdateWithoutReset(valueRef.typeRef);
         };
 
+        Module.eggShell.testHasUpdateAndReset = publicAPI.eggShell.testHasUpdateAndReset = function (valueRef) {
+            if (typeof valueRef !== 'object' || valueRef === null) {
+                throw new Error('valueRef must be an object. Found: ' + valueRef);
+            }
+
+            return Module.typeHelpers.testHasUpdateAndReset(valueRef.typeRef);
+        };
+
         Module.eggShell.readDouble = publicAPI.eggShell.readDouble = function (valueRef) {
             var stack = Module.stackSave();
             var resultPointer = Module.stackAlloc(DOUBLE_SIZE);

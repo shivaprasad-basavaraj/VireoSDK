@@ -158,6 +158,13 @@ Boolean TestNeedsUpdate(TypeRef typeRef, Boolean reset) {
     return needsUpdate;
 }
 
+Boolean TestHasUpdate(TypeRef typeRef, Boolean reset) {
+    Boolean hasUpdate = typeRef->HasUpdate();
+    if (hasUpdate && reset)
+        typeRef->SetHasUpdate(false);
+    return hasUpdate;
+}
+
 struct CheckValueNeedsUpdateParamBlock : InstructionCore
 {
     _ParamDef(StaticType, ValueType);

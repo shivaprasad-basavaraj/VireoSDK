@@ -365,6 +365,10 @@ var assignTypeHelpers;
         Module.typeHelpers.testNeedsUpdateWithoutReset = function (typeRef) {
             return Module._TypeRef_TestNeedsUpdateWithoutReset(typeRef) !== 0;
         };
+
+        Module.typeHelpers.testHasUpdateAndReset = function (typeRef) {
+            return Module._TypeRef_TestHasUpdateAndReset(typeRef) !== 0;
+        };
     };
 }());
 export default assignTypeHelpers;

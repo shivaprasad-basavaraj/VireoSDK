@@ -521,6 +521,7 @@ class TypeCommon
 
     // UInt16 bitfield
     UInt16  _needsUpdate:1;      // (0) Value has been written, needs display (tested by JS)
+    UInt16  _hasUpdate : 1;      // (0) Value has been written, needs display (tested by JS)
     //  properties unique to DefaultPointerType objects
     UInt16  _pointerType:3;       // (1-3)
     UInt16  _ownsDefDefData:1;    // (4) Owns DefaultDefault data (clusters and arrays)
@@ -569,8 +570,11 @@ class TypeCommon
     Boolean IsDataItem() const { return _isDataItem != 0; }
     //! True (for data items) if value has been written to by Vireo but not read by JS
     Boolean NeedsUpdate() const { return _needsUpdate != 0; }
+
+    Boolean HasUpdate() const { return _hasUpdate != 0; }
     //! Set needsUpdate flag for a data item
     void SetNeedsUpdate(Boolean b) { if (_isDataItem != 0) _needsUpdate = b?1:0; }
+    void SetHasUpdate(Boolean b) { _hasUpdate = b ? 1 : 0; }
     //! True if aggregate element is used as an input parameter.
     Boolean IsInputParam() const
     {

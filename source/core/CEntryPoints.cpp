@@ -640,6 +640,12 @@ VIREO_EXPORT Boolean TypeRef_TestNeedsUpdateAndReset(const TypeRef typeRef)
     return TestNeedsUpdate(typeRef, true);
 }
 //------------------------------------------------------------
+//! Check if a value has been written by Vireo (and reset the state)
+VIREO_EXPORT Boolean TypeRef_TestHasUpdateAndReset(const TypeRef typeRef)
+{
+    return TestHasUpdate(typeRef, true);
+}
+//------------------------------------------------------------
 //! Check if a value has been written by Vireo (without resetting the state; only use for debugging)
 VIREO_EXPORT Boolean TypeRef_TestNeedsUpdateWithoutReset(const TypeRef typeRef)
 {
